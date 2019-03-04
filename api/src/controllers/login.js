@@ -124,6 +124,10 @@ const setLocaleCookie = (res, locale) => {
   res.cookie('locale', locale, options);
 };
 
+const deleteForceLoginCookie = (res) => {
+  res.clearCookie('login');
+};
+
 const getRedirectUrl = userCtx => {
   // https://github.com/medic/medic/issues/5035
   // For Test DB, temporarily disable `canCongifure` property to avoid redirecting to admin console
@@ -146,6 +150,7 @@ const setCookies = (req, res, sessionRes) => {
     .then(userCtx => {
       setSessionCookie(res, sessionCookie);
       setUserCtxCookie(res, userCtx);
+      deleteForceLoginCookie(res);
       return auth.getUserSettings(userCtx).then(settings => {
         setLocaleCookie(res, settings.language);
         res.status(302).send(getRedirectUrl(userCtx));
@@ -194,6 +199,11 @@ module.exports = {
       .then(userCtx => {
         // already logged in
         setUserCtxCookie(res, userCtx);
+
+        var hasForceLoginCookie = req.headers.cookie.indexOf('login=force') > -1;
+        if (hasForceLoginCookie) {
+          throw new Error('Force login');
+        }
         res.redirect(redirect);
       })
       .catch(() => {
