@@ -20,6 +20,7 @@ describe('functional transitions', () => {
 
   it('transitions are only executed once if successful', done => {
     configGet.withArgs('transitions').returns({ conditional_alerts: {} });
+    configGet.withArgs('forms').returns({ V: { public_form: true }});
     configGet.withArgs('alerts').returns({
       V: {
         form: 'V',
@@ -71,6 +72,7 @@ describe('functional transitions', () => {
 
   it('transitions are only executed again if first run failed', done => {
     configGet.withArgs('transitions').returns({ conditional_alerts: {} });
+    configGet.withArgs('forms').returns({ V: { public_form: true }});
     configGet.withArgs('alerts').returns({
       V: {
         form: 'V',
@@ -141,6 +143,7 @@ describe('functional transitions', () => {
         condition: 'doc.fields.last_menstrual_period == 15',
       },
     });
+    configGet.withArgs('forms').returns({ V: { public_form: true }});
 
     sinon.stub(db.sentinel, 'get').rejects({ status: 404 });
     sinon.stub(db.medic, 'get').rejects({ status: 404 });
@@ -228,6 +231,7 @@ describe('functional transitions', () => {
         },
       });
       configGet.withArgs('default_responses').returns({ start_date: '2019-01-01' });
+      configGet.withArgs('forms').returns({ V: { public_form: true }});
 
       sinon.stub(db.sentinel, 'get').rejects({ status: 404 });
       sinon.stub(db.medic, 'get').rejects({ status: 404 });
@@ -260,6 +264,7 @@ describe('functional transitions', () => {
         },
       });
       configGet.withArgs('default_responses').returns({ start_date: '2019-01-01' });
+      configGet.withArgs('forms').returns({ V: { public_form: true }});
 
       sinon.stub(db.sentinel, 'get').rejects({ status: 404 });
       sinon.stub(db.medic, 'get').rejects({ status: 404 });
@@ -305,6 +310,7 @@ describe('functional transitions', () => {
         },
       });
       configGet.withArgs('default_responses').returns({ start_date: '2019-01-01' });
+      configGet.withArgs('forms').returns({ V: { public_form: true }});
 
       sinon.stub(db.sentinel, 'get').rejects({ status: 404 });
       sinon.stub(db.medic, 'get').rejects({ status: 404 });
@@ -380,6 +386,7 @@ describe('functional transitions', () => {
           join_responses: false
         }
       }]);
+      configGet.withArgs('forms').returns({ V: { public_form: true }, P: { public_form: true }});
 
       const docs = [
         {

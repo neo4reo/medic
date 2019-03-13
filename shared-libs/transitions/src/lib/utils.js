@@ -5,7 +5,8 @@ const _ = require('underscore'),
   config = require('../config'),
   taskUtils = require('@medic/task-utils'),
   registrationUtils = require('@medic/registration-utils'),
-  logger = require('./logger');
+  logger = require('./logger'),
+  XFORM_CONTENT_TYPE = 'xml';
 
 /*
  * Get desired locale
@@ -313,5 +314,20 @@ module.exports = {
   isNonEmptyString: expr => typeof expr === 'string' && expr.trim() !== '',
   evalExpression: (expr, context) => vm.runInNewContext(expr, context),
 
-  getSubjectIds: contact => registrationUtils.getSubjectIds(contact)
+  getSubjectIds: contact => registrationUtils.getSubjectIds(contact),
+
+  // given a report, returns whether it should be accepted as a valid form submission
+  // a report is accepted if
+  // - it's an xform
+  // - it's an SMS public form
+  // - it's an SMS form submitted by a known contact
+  isValidSubmission: doc => {
+    const form = doc && module.exports.getForm(doc.form);
+    return Boolean(
+      doc &&
+      doc.content_type === XFORM_CONTENT_TYPE || // xform submission
+      (form && form.public_form) || // json submission to public form
+      (form && module.exports.getClinicPhone(doc)) // json submission by known submitter
+    );
+  }
 };

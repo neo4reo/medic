@@ -44,7 +44,8 @@ module.exports = {
       doc &&
       doc.form &&
       doc.type === 'data_record' &&
-      !transitionUtils.hasRun(info, NAME)
+      !transitionUtils.hasRun(info, NAME) &&
+      utils.isValidSubmission(doc)
     );
   },
   onMatch: change => {
