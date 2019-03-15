@@ -28,7 +28,7 @@ module.exports = [
         days: 0,
         start: 0,
         end: 6,
-        dueDate: function(r, event) {
+        dueDate: function(event, c, r) {
           return new Date(
             Utils.addDate(
               new Date(
@@ -73,7 +73,7 @@ module.exports = [
         id: 'pregnancy-missing-birth',
         start: 1,
         end: 13,
-        dueDate: function(r) {
+        dueDate: function(event, c, r) {
           return Utils.addDate(
             new Date(r.scheduled_tasks[r.scheduled_tasks.length - 1].due),
             7
@@ -218,7 +218,7 @@ module.exports = [
         id: 'postnatal-danger-sign',
         start: 0,
         end: 6,
-        dueDate: function() {
+        dueDate: function(event, c) {
           return new Date(Utils.getMostRecentTimestamp(c.reports, 'F'));
         },
       },

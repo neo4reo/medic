@@ -45,7 +45,7 @@ module.exports = [
 
     appliesTo: 'reports',
     appliesIf: extras.isNewestPregnancy,
-    emitCustom: function(c, r) {
+    emitCustom: function(inst, c, r) {
       var instance = createTargetInstance(
         'pregnancy-registrations-this-month',
         r,
@@ -354,7 +354,7 @@ module.exports = [
       return immunizationForms.indexOf(r.form) !== -1;
     },
     date: 'reported',
-    emitCustom: function(c, r) {
+    emitCustom: function(inst, c, r) {
       var i, instance;
       if (r.form === 'immunization_visit' || r.form === 'imm') {
         // Multiple vaccine doses can be reported in a single XForm (app or collect)
