@@ -8,6 +8,7 @@ const async = require('async'),
 const tasks = {
   dueTasks: transitionsLib.dueTasks,
   reminders: require('./reminders'),
+  outboundQueue: require('./outbound')
 };
 
 function getTime(_hour, _minute) {
@@ -47,6 +48,7 @@ exports.checkSchedule = function() {
           cb();
         }
       },
+      tasks.outboundQueue.execute
     ],
     err => {
       if (err) {
