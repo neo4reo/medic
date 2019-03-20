@@ -48,6 +48,10 @@ angular.module('inboxServices').factory('Actions',
 
         setSelectMode: function(selectMode) {
           dispatch(createSetSelectModeAction(selectMode));
+        },
+
+        setRefreshList: function(refreshList) {
+          dispatch(createSingleValueAction('SET_REFRESH_LIST', 'refreshList', refreshList));
         }
       };
     };

@@ -11,6 +11,7 @@ angular
     $state,
     $stateParams,
     $timeout,
+    Actions,
     AddReadStatus,
     Changes,
     DB,
@@ -21,6 +22,7 @@ angular
     ReportViewModelGenerator,
     Search,
     SearchFilters,
+    Session,
     Tour
   ) {
     'use strict';
@@ -30,10 +32,18 @@ angular
     var mapStateToTarget = function(state) {
       return {
         selectMode: state.selectMode,
-        enketoStatus: state.enketoStatus
+        enketoStatus: state.enketoStatus,
+        refreshList: state.refreshList
       };
     };
-    var unsubscribe = $ngRedux.connect(mapStateToTarget)(ctrl);
+
+    var mapDispatchToTarget = function(dispatch) {
+      var actions = Actions(dispatch);
+      return {
+        setRefreshList: actions.setRefreshList
+      };
+    };
+    var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
 
     var lineage = lineageFactory();
 
@@ -211,6 +221,7 @@ angular
     };
 
     var query = function(opts) {
+      ctrl.setRefreshList(false);
       const options = _.extend({ limit: 50, hydrateContactNames: true }, opts);
       if (!options.silent) {
         $scope.error = false;
@@ -488,11 +499,13 @@ angular
 
     $scope.$on('DeselectAll', deselectAll);
 
+    const refreshList = () => ctrl.refreshList && Session.isOnlineOnly();
+
     var changeListener = Changes({
       key: 'reports-list',
       callback: function(change) {
         if (change.deleted) {
-          liveList.remove(change.doc);
+          liveList.remove(change.id);
           $scope.hasReports = liveList.count() > 0;
           setActionBarData();
         } else {
@@ -500,7 +513,7 @@ angular
         }
       },
       filter: function(change) {
-        return change.doc.form || liveList.containsDeleteStub(change.doc);
+        return change.doc && change.doc.form || change.deleted || refreshList();
       },
     });
 

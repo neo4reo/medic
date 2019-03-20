@@ -618,7 +618,7 @@ module.exports = function(grunt) {
         ],
       },
       'webapp-js': {
-        files: ['webapp/src/js/**/*', 'shared-libs/**'],
+        files: ['webapp/src/js/**/*', 'shared-libs/*/src/**/*'],
         tasks: [
           'browserify:webapp',
           'replace:update-app-constants',

@@ -78,7 +78,7 @@ describe('Contacts controller', () => {
     icon = 'fa-la-la-la-la';
     buttonLabel = 'ClICK ME!!';
     typeLabel = 'District';
-    actions = { clearCancelCallback: sinon.stub() };
+    actions = { clearCancelCallback: sinon.stub(), setRefreshList: sinon.stub() };
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     scope.setTitle = sinon.stub();
@@ -1033,20 +1033,17 @@ describe('Contacts controller', () => {
       ];
 
       deadListContains.returns(false);
-      deadListContains.withArgs({ _id: 'something' }).returns(true);
+      deadListContains.withArgs('something').returns(true);
 
       return createController()
         .getSetupPromiseForTesting()
         .then(() => {
-          assert.equal(!!changesFilter({ doc: relevantReport }), true);
-          assert.equal(!!changesFilter({ doc: irrelevantReports[0] }), false);
-          assert.equal(!!changesFilter({ doc: irrelevantReports[1] }), false);
-          assert.equal(!!changesFilter({ doc: irrelevantReports[2] }), false);
-          assert.equal(!!changesFilter({ doc: irrelevantReports[3] }), false);
-          assert.equal(
-            !!changesFilter({ doc: deletedReport, deleted: true }),
-            false
-          );
+          assert.equal(!!changesFilter({ doc: relevantReport, id: 'relevantReport' }), true);
+          assert.equal(!!changesFilter({ doc: irrelevantReports[0], id: 'irrelevant1' }), false);
+          assert.equal(!!changesFilter({ doc: irrelevantReports[1], id: 'irrelevant2' }), false);
+          assert.equal(!!changesFilter({ doc: irrelevantReports[2], id: 'irrelevant3' }), false);
+          assert.equal(!!changesFilter({ doc: irrelevantReports[3], id: 'irrelevant4' }), false);
+          assert.equal(!!changesFilter({ doc: deletedReport, deleted: true }), true);
         });
     });
 
@@ -1093,7 +1090,7 @@ describe('Contacts controller', () => {
       ];
 
       deadListContains.returns(false);
-      deadListContains.withArgs({ _id: 'something' }).returns(true);
+      deadListContains.withArgs('something').returns(true);
 
       return createController()
         .getSetupPromiseForTesting()
@@ -1135,7 +1132,7 @@ describe('Contacts controller', () => {
       describe('uhc visits enabled', () => {
         beforeEach(() => {
           auth.resolves();
-          deadListContains.withArgs({ _id: 4 }).returns(true);
+          deadListContains.withArgs(4).returns(true);
         });
         describe('alpha default sorting', () => {
           it('does not require refreshing when sorting is `alpha` and visit report is received', () => {
@@ -1305,7 +1302,7 @@ describe('Contacts controller', () => {
       describe('uhc visits disabled', () => {
         beforeEach(() => {
           auth.rejects();
-          deadListContains.withArgs({ _id: 4 }).returns(true);
+          deadListContains.withArgs(4).returns(true);
         });
 
         describe('alpha default sorting', () => {

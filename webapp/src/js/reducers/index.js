@@ -6,7 +6,8 @@
       saving: false,
       error: null
     },
-    selectMode: false
+    selectMode: false,
+    refreshList: false
   };
 
   module.exports = function(state, action) {
@@ -23,6 +24,8 @@
         });
       case 'SET_SELECT_MODE':
         return Object.assign({}, state, { selectMode: action.payload.selectMode });
+      case 'SET_REFRESH_LIST':
+        return Object.assign({}, state, { refreshList: action.payload.refreshList });
       default:
         return state;
     }
