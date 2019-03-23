@@ -113,7 +113,11 @@ angular
       $scope.selected = null;
     });
 
-    const refreshList = () => ctrl.refreshList && Session.isOnlineOnly();
+    const refreshList = change => (
+      ctrl.refreshList &&
+      (ctrl.refreshList === true || ctrl.refreshList === change.id) &&
+      Session.isOnlineOnly()
+    );
 
     var changeListener = Changes({
       key: 'messages-list',
@@ -128,7 +132,7 @@ angular
           (change.doc && change.doc.kujua_message) ||
           (change.doc && change.doc.sms_message) ||
           change.deleted ||
-          refreshList()
+          refreshList(change)
         );
       },
     });

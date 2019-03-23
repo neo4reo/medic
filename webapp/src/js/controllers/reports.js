@@ -190,7 +190,7 @@ angular
     };
 
     $scope.deselectReport = function(report) {
-      spliceSelected(report._id);
+      spliceSelected(_.isString(report) ? report : report._id);
       $(
         '#reports-list li[data-record-id="' +
           report._id +
@@ -347,6 +347,7 @@ angular
         }
 
         doc.verified = doc.verified === valid ? undefined : valid;
+        ctrl.setRefreshList(doc._id);
 
         DB()
           .post(doc)
@@ -499,7 +500,11 @@ angular
 
     $scope.$on('DeselectAll', deselectAll);
 
-    const refreshList = () => ctrl.refreshList && Session.isOnlineOnly();
+    const refreshList = change => (
+      ctrl.refreshList &&
+      (ctrl.refreshList === true || ctrl.refreshList === change.id) &&
+      Session.isOnlineOnly()
+    );
 
     var changeListener = Changes({
       key: 'reports-list',
@@ -513,7 +518,7 @@ angular
         }
       },
       filter: function(change) {
-        return change.doc && change.doc.form || change.deleted || refreshList();
+        return change.doc && change.doc.form || change.deleted || refreshList(change);
       },
     });
 
