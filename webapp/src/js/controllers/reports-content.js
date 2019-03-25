@@ -120,7 +120,7 @@ var _ = require('underscore');
                       $scope.selected[0].formatted.verified = change.doc.verified;
                     });
                   }
-                } else {2
+                } else {
                   if (selected[0].formatted.hasOwnProperty('oldVerified')) {
                     const verified = $scope.selected[0].formatted.verified;
                     $scope.selected = selected;
