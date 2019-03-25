@@ -37,13 +37,13 @@ angular
       };
     };
 
-    var mapDispatchToTarget = function(dispatch) {
-      var actions = Actions(dispatch);
+    const mapDispatchToTarget = (dispatch) => {
+      const actions = Actions(dispatch);
       return {
         setUpdateOnChange: actions.setUpdateOnChange
       };
     };
-    var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
+    const unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
 
     var lineage = lineageFactory();
     const isOnlineOnly = Session.isOnlineOnly();
