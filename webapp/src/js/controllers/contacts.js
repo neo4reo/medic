@@ -36,19 +36,20 @@ var _ = require('underscore'),
     var mapStateToTarget = function(state) {
       return {
         enketoStatus: state.enketoStatus,
-        refreshList: state.refreshList
+        updateOnChange: state.updateOnChange
       };
     };
     var mapDispatchToTarget = function(dispatch) {
       var actions = Actions(dispatch);
       return {
         clearCancelCallback: actions.clearCancelCallback,
-        setRefreshList: actions.setRefreshList
+        setUpdateOnChange: actions.setUpdateOnChange
       };
     };
     var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
 
     var liveList = LiveList.contacts;
+    const isOnlineOnly = Session.isOnlineOnly();
 
     LiveList.$init($scope, 'contacts', 'contact-search');
 
@@ -76,7 +77,7 @@ var _ = require('underscore'),
     };
 
     var _query = function(options) {
-      ctrl.setRefreshList(false);
+      ctrl.setUpdateOnChange(false);
       options = options || {};
       options.limit = options.limit || 50;
 
@@ -461,11 +462,9 @@ var _ = require('underscore'),
       );
     };
 
-    const refreshList = change => (
-      ctrl.refreshList &&
-      (ctrl.refreshList === true || ctrl.refreshList === change.id) &&
-      Session.isOnlineOnly()
-    );
+    const shouldUpdateOnChange = change => isOnlineOnly &&
+                                           ctrl.updateOnChange &&
+                                           (ctrl.updateOnChange === true || ctrl.updateOnChange === change.id);
 
     var changeListener = Changes({
       key: 'contacts-list',
@@ -503,7 +502,7 @@ var _ = require('underscore'),
           liveList.containsDeleteStub(change.doc) ||
           isRelevantVisitReport(change.doc) ||
           change.deleted ||
-          refreshList(change)
+          shouldUpdateOnChange(change)
         );
       },
     });

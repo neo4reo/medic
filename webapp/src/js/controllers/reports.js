@@ -33,19 +33,20 @@ angular
       return {
         selectMode: state.selectMode,
         enketoStatus: state.enketoStatus,
-        refreshList: state.refreshList
+        updateOnChange: state.updateOnChange
       };
     };
 
     var mapDispatchToTarget = function(dispatch) {
       var actions = Actions(dispatch);
       return {
-        setRefreshList: actions.setRefreshList
+        setUpdateOnChange: actions.setUpdateOnChange
       };
     };
     var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
 
     var lineage = lineageFactory();
+    const isOnlineOnly = Session.isOnlineOnly();
 
     // selected objects have the form
     //    { _id: 'abc', summary: { ... }, report: { ... }, expanded: false }
@@ -221,7 +222,7 @@ angular
     };
 
     var query = function(opts) {
-      ctrl.setRefreshList(false);
+      ctrl.setUpdateOnChange(false);
       const options = _.extend({ limit: 50, hydrateContactNames: true }, opts);
       if (!options.silent) {
         $scope.error = false;
@@ -347,7 +348,7 @@ angular
         }
 
         doc.verified = doc.verified === valid ? undefined : valid;
-        ctrl.setRefreshList(doc._id);
+        ctrl.setUpdateOnChange(doc._id);
 
         DB()
           .post(doc)
@@ -500,11 +501,9 @@ angular
 
     $scope.$on('DeselectAll', deselectAll);
 
-    const refreshList = change => (
-      ctrl.refreshList &&
-      (ctrl.refreshList === true || ctrl.refreshList === change.id) &&
-      Session.isOnlineOnly()
-    );
+    const shouldUpdateOnChange = change => isOnlineOnly &&
+                                           ctrl.updateOnChange &&
+                                           (ctrl.updateOnChange === true || ctrl.updateOnChange === change.id);
 
     var changeListener = Changes({
       key: 'reports-list',
@@ -518,7 +517,7 @@ angular
         }
       },
       filter: function(change) {
-        return change.doc && change.doc.form || change.deleted || refreshList(change);
+        return change.doc && change.doc.form || change.deleted || shouldUpdateOnChange(change);
       },
     });
 

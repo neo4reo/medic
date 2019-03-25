@@ -7,7 +7,7 @@
       error: null
     },
     selectMode: false,
-    refreshList: false
+    updateOnChange: false
   };
 
   module.exports = function(state, action) {
@@ -24,8 +24,8 @@
         });
       case 'SET_SELECT_MODE':
         return Object.assign({}, state, { selectMode: action.payload.selectMode });
-      case 'SET_REFRESH_LIST':
-        return Object.assign({}, state, { refreshList: action.payload.refreshList });
+      case 'SET_UPDATE_ON_CHANGE':
+        return Object.assign({}, state, { updateOnChange: action.payload.updateOnChange });
       default:
         return state;
     }

@@ -78,7 +78,7 @@ describe('Contacts controller', () => {
     icon = 'fa-la-la-la-la';
     buttonLabel = 'ClICK ME!!';
     typeLabel = 'District';
-    actions = { clearCancelCallback: sinon.stub(), setRefreshList: sinon.stub() };
+    actions = { clearCancelCallback: sinon.stub(), setUpdateOnChange: sinon.stub() };
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     scope.setTitle = sinon.stub();
@@ -168,7 +168,8 @@ describe('Contacts controller', () => {
           isAdmin: () => {
             return isAdmin;
           },
-          isDbAdmin: isDbAdmin
+          isDbAdmin: isDbAdmin,
+          isOnlineOnly: () => isAdmin
         },
         Settings: settings,
         Simprints: { enabled: () => false },

@@ -30,7 +30,15 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
       message: ''
     };
 
-    var refreshList = false;
+    const userCtx = Session.userCtx(),
+          isOnlineOnly = Session.isOnlineOnly(userCtx);
+    let updateOnChange = false;
+
+    const shouldUpdateOnChange = change => isOnlineOnly &&
+                                           updateOnChange &&
+                                           (updateOnChange === true || updateOnChange === change.id);
+
+    const setUpdateOnChange = value => updateOnChange = value;
 
     var checkScroll = function() {
       if (this.scrollTop === 0 && !$scope.allLoaded) {
@@ -121,6 +129,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
     };
 
     var updateConversation = function(options) {
+      setUpdateOnChange(false);
       var selectedId = $scope.selected && $scope.selected.id;
       if (selectedId) {
         var skip = options.skip && $scope.selected.messages.length;
@@ -142,7 +151,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
                 angular.extend(match, updated);
               } else {
                 $scope.selected.messages.push(updated);
-                if (updated.doc.sent_by === Session.userCtx().name) {
+                if (updated.doc.sent_by === userCtx.name) {
                   scrollToBottom = true;
                 }
               }
@@ -182,8 +191,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
       } else { // unknown sender
         recipient = { doc: { contact: { phone: $scope.selected.id } } };
       }
-      refreshList = Session.isOnlineOnly();
-      SendMessage(recipient, $scope.send.message)
+      SendMessage(recipient, $scope.send.message, setUpdateOnChange)
         .then(() => {
           $scope.send.message = '';
         })
@@ -218,7 +226,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
         return $scope.currentTab === 'messages' &&
           $scope.selected &&
           _.findWhere($scope.selected.messages, { id: change.id }) ||
-          refreshList;
+          shouldUpdateOnChange(change);
       }
     });
 

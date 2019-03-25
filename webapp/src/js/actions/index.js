@@ -25,6 +25,10 @@ angular.module('inboxServices').factory('Actions',
         return createSingleValueAction('SET_SELECT_MODE', 'selectMode', value);
       }
 
+      function createUpdateOnChangeAction(value) {
+        return createSingleValueAction('SET_UPDATE_ON_CHANGE', 'updateOnChange', value);
+      }
+
       return {
         clearCancelCallback: function() {
           dispatch(createSetCancelCallbackAction(null));
@@ -50,8 +54,8 @@ angular.module('inboxServices').factory('Actions',
           dispatch(createSetSelectModeAction(selectMode));
         },
 
-        setRefreshList: function(refreshList) {
-          dispatch(createSingleValueAction('SET_REFRESH_LIST', 'refreshList', refreshList));
+        setUpdateOnChange: function(updateOnChange) {
+          dispatch(createUpdateOnChangeAction(updateOnChange));
         }
       };
     };

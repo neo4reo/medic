@@ -21,19 +21,16 @@ angular
     'ngInject';
 
     const ctrl = this;
-    const mapStateToTarget = function(state) {
-      return {
-        refreshList: state.refreshList
-      };
-    };
-    const mapDispatchToTarget = function(dispatch) {
+    const mapStateToTarget = (state) => ({ updateOnChange: state.updateOnChange });
+    const mapDispatchToTarget = (dispatch) => {
       const actions = Actions(dispatch);
       return {
-        setRefreshList: actions.setRefreshList
+        setUpdateOnChange: actions.setUpdateOnChange
       };
     };
 
     const unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
+    const isOnlineOnly = Session.isOnlineOnly();
 
     $scope.allLoaded = false;
     $scope.messages = [];
@@ -59,7 +56,7 @@ angular
     };
 
     var updateConversations = function(options) {
-      ctrl.setRefreshList(false);
+      ctrl.setUpdateOnChange(false);
       options = options || {};
       if (!options.changes) {
         $scope.loading = true;
@@ -113,11 +110,9 @@ angular
       $scope.selected = null;
     });
 
-    const refreshList = change => (
-      ctrl.refreshList &&
-      (ctrl.refreshList === true || ctrl.refreshList === change.id) &&
-      Session.isOnlineOnly()
-    );
+    const shouldUpdateOnChange = change => isOnlineOnly &&
+                                           ctrl.updateOnChange &&
+                                           (ctrl.updateOnChange === true || ctrl.updateOnChange === change.id);
 
     var changeListener = Changes({
       key: 'messages-list',
@@ -132,7 +127,7 @@ angular
           (change.doc && change.doc.kujua_message) ||
           (change.doc && change.doc.sms_message) ||
           change.deleted ||
-          refreshList(change)
+          shouldUpdateOnChange(change)
         );
       },
     });
