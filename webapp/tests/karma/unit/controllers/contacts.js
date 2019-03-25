@@ -1,8 +1,7 @@
 describe('Contacts controller', () => {
   'use strict';
 
-  let actions,
-    assert = chai.assert,
+  let assert = chai.assert,
     buttonLabel,
     contactsLiveList,
     childType,
@@ -35,11 +34,13 @@ describe('Contacts controller', () => {
     contactSummary,
     isDbAdmin,
     liveListInit,
-    liveListReset;
+    liveListReset,
+    dispatch,
+    getState;
 
   beforeEach(module('inboxApp'));
 
-  beforeEach(inject((_$rootScope_, $controller) => {
+  beforeEach(inject((_$rootScope_, $controller, $ngRedux, Actions) => {
     deadListFind = sinon.stub();
     deadListContains = sinon.stub();
     deadList = () => {
@@ -67,7 +68,6 @@ describe('Contacts controller', () => {
           return false;
         },
         contains: deadListContains,
-        containsDeleteStub: sinon.stub(),
         setScope: sinon.stub()
       };
     };
@@ -78,7 +78,6 @@ describe('Contacts controller', () => {
     icon = 'fa-la-la-la-la';
     buttonLabel = 'ClICK ME!!';
     typeLabel = 'District';
-    actions = { clearCancelCallback: sinon.stub(), setUpdateOnChange: sinon.stub() };
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     scope.setTitle = sinon.stub();
@@ -149,7 +148,6 @@ describe('Contacts controller', () => {
         $state: { includes: sinon.stub(), go: sinon.stub() },
         $timeout: work => work(),
         $translate: $translate,
-        Actions: () => actions,
         Auth: auth,
         Changes: changes,
         ContactSchema: contactSchema,
@@ -179,6 +177,8 @@ describe('Contacts controller', () => {
         XmlForms: xmlForms,
       });
     };
+    dispatch = Actions($ngRedux.dispatch);
+    getState = $ngRedux.getState;
   }));
 
   it('sets title', () => {
@@ -755,7 +755,6 @@ describe('Contacts controller', () => {
             changesFilter({ doc: { type: 'district_hospital' } }),
             true
           );
-          assert.equal(contactsLiveList.containsDeleteStub.callCount, 0);
         });
     });
 
@@ -766,7 +765,6 @@ describe('Contacts controller', () => {
           assert.isNotOk(changesFilter({ doc: {} }));
           assert.isNotOk(changesFilter({ doc: { type: 'data_record' } }));
           assert.isNotOk(changesFilter({ doc: { type: '' } }));
-          assert.equal(contactsLiveList.containsDeleteStub.callCount, 3);
         });
     });
 
@@ -807,12 +805,58 @@ describe('Contacts controller', () => {
         });
     });
 
-    it('filtering returns true for contained tombstones', () => {
-      contactsLiveList.containsDeleteStub.returns(true);
+    it('filtering returns true for contained deletions', () => {
+      isAdmin = false;
+      deadListContains.returns(true);
       return createController()
         .getSetupPromiseForTesting()
         .then(() => {
-          assert.equal(changesFilter({ doc: {} }), true);
+          assert.equal(changesFilter({ deleted: true, id: 'some_id' }), true);
+          assert.equal(deadListContains.callCount, 1);
+          assert.deepEqual(deadListContains.args[0], ['some_id']);
+        });
+    });
+
+    it('filtering returns false for not contained deletions', () => {
+      deadListContains.returns(false);
+      return createController()
+        .getSetupPromiseForTesting()
+        .then(() => {
+          assert.equal(changesFilter({ deleted: true, id: 'some_id' }), false);
+          assert.equal(deadListContains.callCount, 1);
+          assert.deepEqual(deadListContains.args[0], ['some_id']);
+        });
+    });
+
+    it('filtering returns true for self triggered changes for admins', () => {
+      isAdmin = true;
+      return createController()
+        .getSetupPromiseForTesting()
+        .then(() => {
+          dispatch.setUpdateOnChange('some_id');
+          assert.equal(changesFilter({ id: 'some_id' }), true);
+        });
+    });
+
+    it('filtering returns false for not self triggered changes for admins', () => {
+      isAdmin = true;
+      return createController()
+        .getSetupPromiseForTesting()
+        .then(() => {
+          dispatch.setUpdateOnChange(false);
+          assert.equal(changesFilter({ id: 'some_id' }), false);
+        });
+    });
+
+    it('clears updateOnChange when searching', () => {
+      searchResults = [{ _id: 'search-result' }, { _id: district._id }];
+      return createController()
+        .getSetupPromiseForTesting()
+        .then(() => {
+          dispatch.setUpdateOnChange('some_other_id');
+          changesCallback({ id: 'some_id' });
+          assert.equal(searchService.args[1][2].limit, 2);
+          assert.equal(getState().updateOnChange, false);
         });
     });
   });
@@ -1015,7 +1059,7 @@ describe('Contacts controller', () => {
       const deletedReport = {
         type: 'data_record',
         form: 'home_visit',
-        fields: { visited_contact_uuid: 'deleted' },
+        fields: { visited_contact_uuid: 'something' },
         _deleted: true,
       };
       const irrelevantReports = [
@@ -1031,6 +1075,12 @@ describe('Contacts controller', () => {
           form: 'home_visit',
           fields: { visited_contact_uuid: 'something' },
         },
+        {
+          type: 'data_record',
+          form: 'home_visit',
+          fields: { visited_contact_uuid: 'irrelevant' },
+          _deleted: true
+        }
       ];
 
       deadListContains.returns(false);
@@ -1044,6 +1094,7 @@ describe('Contacts controller', () => {
           assert.equal(!!changesFilter({ doc: irrelevantReports[1], id: 'irrelevant2' }), false);
           assert.equal(!!changesFilter({ doc: irrelevantReports[2], id: 'irrelevant3' }), false);
           assert.equal(!!changesFilter({ doc: irrelevantReports[3], id: 'irrelevant4' }), false);
+          assert.equal(!!changesFilter({ doc: irrelevantReports[4], id: 'irrelevant5' }), false);
           assert.equal(!!changesFilter({ doc: deletedReport, deleted: true }), true);
         });
     });

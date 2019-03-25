@@ -343,11 +343,11 @@ angular.module('inboxServices').factory('LiveList',
       return idx.list && idx.list.length;
     }
 
-    /* 
-    reuseExistingDom is a performance optimization wherein live-list can rely on the changes feed to 
-    specifically update dom elements (via update/remove interfaces) making it safe to re-use existing dom 
+    /*
+    reuseExistingDom is a performance optimization wherein live-list can rely on the changes feed to
+    specifically update dom elements (via update/remove interfaces) making it safe to re-use existing dom
     elements for certain scenarios
-    */ 
+    */
     function _set(listName, items, reuseExistingDom) {
       const idx = indexes[listName];
       if (!idx) {
@@ -364,7 +364,7 @@ angular.module('inboxServices').factory('LiveList',
         newDom[item._id] = li;
       }
       idx.dom = newDom;
-      
+
       _refresh(listName);
     }
 
@@ -481,22 +481,6 @@ angular.module('inboxServices').factory('LiveList',
       delete idx.selected;
     }
 
-    function _containsDeleteStub(listName, doc) {
-      // determines if array2 is included in array1
-      var arrayIncludes = function(array1, array2) {
-        return array2.every(function(elem) {
-          return array1.indexOf(elem) !== -1;
-        });
-      };
-      // CouchDB/Fauxton deletes don't include doc fields in the deleted revision
-      // _conflicts, _attachments can be part of the _changes request result
-      var stubProps = [ '_id', '_rev', '_deleted', '_conflicts', '_attachments' ];
-      return doc &&
-             arrayIncludes(stubProps, Object.keys(doc)) &&
-             !!doc._deleted &&
-             _contains(listName, doc);
-    }
-
     function _setScope(listName, scope) {
       indexes[listName].scope = scope;
     }
@@ -562,7 +546,6 @@ angular.module('inboxServices').factory('LiveList',
         initialised: _.partial(_initialised, name),
         setSelected: _.partial(_setSelected, name),
         clearSelected: _.partial(_clearSelected, name),
-        containsDeleteStub: _.partial(_containsDeleteStub, name),
         setScope: _.partial(_setScope, name)
       };
 
