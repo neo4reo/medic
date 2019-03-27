@@ -14,7 +14,6 @@ angular
     Export,
     MessageContacts,
     MessageListUtils,
-    Session,
     Tour
   ) {
     'use strict';
@@ -30,7 +29,7 @@ angular
     };
 
     const unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
-    const isOnlineOnly = Session.isOnlineOnly();
+
 
     $scope.allLoaded = false;
     $scope.messages = [];
@@ -110,9 +109,7 @@ angular
       $scope.selected = null;
     });
 
-    const shouldUpdateOnChange = change => isOnlineOnly &&
-                                           ctrl.updateOnChange &&
-                                           (ctrl.updateOnChange === true || ctrl.updateOnChange === change.id);
+    const shouldUpdateOnChange = change => ctrl.updateOnChange === true || ctrl.updateOnChange === change.id;
 
     var changeListener = Changes({
       key: 'messages-list',
