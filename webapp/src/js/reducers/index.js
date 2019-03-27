@@ -7,7 +7,7 @@
       error: null
     },
     selectMode: false,
-    updateOnChange: false
+    lastChangedDoc: false
   };
 
   module.exports = function(state, action) {
@@ -24,8 +24,8 @@
         });
       case 'SET_SELECT_MODE':
         return Object.assign({}, state, { selectMode: action.payload.selectMode });
-      case 'SET_UPDATE_ON_CHANGE':
-        return Object.assign({}, state, { updateOnChange: action.payload.updateOnChange });
+      case 'SET_LAST_CHANGED_DOC':
+        return Object.assign({}, state, { lastChangedDoc: action.payload.lastChangedDoc });
       default:
         return state;
     }

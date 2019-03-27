@@ -25,8 +25,8 @@ angular.module('inboxServices').factory('Actions',
         return createSingleValueAction('SET_SELECT_MODE', 'selectMode', value);
       }
 
-      function createUpdateOnChangeAction(value) {
-        return createSingleValueAction('SET_UPDATE_ON_CHANGE', 'updateOnChange', value);
+      function createSetLastChangedDoc(value) {
+        return createSingleValueAction('SET_LAST_CHANGED_DOC', 'lastChangedDoc', value);
       }
 
       return {
@@ -54,8 +54,8 @@ angular.module('inboxServices').factory('Actions',
           dispatch(createSetSelectModeAction(selectMode));
         },
 
-        setUpdateOnChange: function(updateOnChange) {
-          dispatch(createUpdateOnChangeAction(updateOnChange));
+        setLastChangedDoc: function(doc) {
+          dispatch(createSetLastChangedDoc(doc));
         }
       };
     };

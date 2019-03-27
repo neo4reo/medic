@@ -38,7 +38,7 @@ angular
     const mapDispatchToTarget = (dispatch) => {
       const actions = Actions(dispatch);
       return {
-        setUpdateOnChange: actions.setUpdateOnChange
+        setLastChangedDoc: actions.setLastChangedDoc
       };
     };
     const unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
@@ -341,7 +341,7 @@ angular
         }
 
         doc.verified = doc.verified === valid ? undefined : valid;
-        ctrl.setUpdateOnChange(doc);
+        ctrl.setLastChangedDoc(doc);
 
         DB()
           .post(doc)
