@@ -34,13 +34,11 @@ describe('Contacts controller', () => {
     contactSummary,
     isDbAdmin,
     liveListInit,
-    liveListReset,
-    dispatch,
-    getState;
+    liveListReset;
 
   beforeEach(module('inboxApp'));
 
-  beforeEach(inject((_$rootScope_, $controller, $ngRedux, Actions) => {
+  beforeEach(inject((_$rootScope_, $controller) => {
     deadListFind = sinon.stub();
     deadListContains = sinon.stub();
     deadList = () => {
@@ -166,8 +164,7 @@ describe('Contacts controller', () => {
           isAdmin: () => {
             return isAdmin;
           },
-          isDbAdmin: isDbAdmin,
-          isOnlineOnly: () => isAdmin
+          isDbAdmin: isDbAdmin
         },
         Settings: settings,
         Simprints: { enabled: () => false },
@@ -177,8 +174,6 @@ describe('Contacts controller', () => {
         XmlForms: xmlForms,
       });
     };
-    dispatch = Actions($ngRedux.dispatch);
-    getState = $ngRedux.getState;
   }));
 
   it('sets title', () => {
@@ -817,48 +812,7 @@ describe('Contacts controller', () => {
         });
     });
 
-    it('filtering returns false for not contained deletions', () => {
-      deadListContains.returns(false);
-      return createController()
-        .getSetupPromiseForTesting()
-        .then(() => {
-          assert.equal(changesFilter({ deleted: true, id: 'some_id' }), false);
-          assert.equal(deadListContains.callCount, 1);
-          assert.deepEqual(deadListContains.args[0], ['some_id']);
-        });
-    });
-
-    it('filtering returns true for self triggered changes for admins', () => {
-      isAdmin = true;
-      return createController()
-        .getSetupPromiseForTesting()
-        .then(() => {
-          dispatch.setUpdateOnChange('some_id');
-          assert.equal(changesFilter({ id: 'some_id' }), true);
-        });
-    });
-
-    it('filtering returns false for not self triggered changes for admins', () => {
-      isAdmin = true;
-      return createController()
-        .getSetupPromiseForTesting()
-        .then(() => {
-          dispatch.setUpdateOnChange(false);
-          assert.equal(changesFilter({ id: 'some_id' }), false);
-        });
-    });
-
-    it('clears updateOnChange when searching', () => {
-      searchResults = [{ _id: 'search-result' }, { _id: district._id }];
-      return createController()
-        .getSetupPromiseForTesting()
-        .then(() => {
-          dispatch.setUpdateOnChange('some_other_id');
-          changesCallback({ id: 'some_id' });
-          assert.equal(searchService.args[1][2].limit, 2);
-          assert.equal(getState().updateOnChange, false);
-        });
-    });
+    // test for empty doc!
   });
 
   describe('last visited date', function() {

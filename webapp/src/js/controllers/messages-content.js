@@ -32,10 +32,6 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
 
     const userCtx = Session.userCtx();
 
-    let updateOnChange = false;
-    const shouldUpdateOnChange = change => updateOnChange === true || updateOnChange === change.id;
-    const setUpdateOnChange = value => updateOnChange = value;
-
     var checkScroll = function() {
       if (this.scrollTop === 0 && !$scope.allLoaded) {
         updateConversation({ skip: true });
@@ -125,7 +121,6 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
     };
 
     var updateConversation = function(options) {
-      setUpdateOnChange(false);
       var selectedId = $scope.selected && $scope.selected.id;
       if (selectedId) {
         var skip = options.skip && $scope.selected.messages.length;
@@ -187,7 +182,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
       } else { // unknown sender
         recipient = { doc: { contact: { phone: $scope.selected.id } } };
       }
-      SendMessage(recipient, $scope.send.message, setUpdateOnChange)
+      SendMessage(recipient, $scope.send.message)
         .then(() => {
           $scope.send.message = '';
         })
@@ -221,8 +216,7 @@ angular.module('inboxControllers').controller('MessagesContentCtrl',
       filter: function(change) {
         return $scope.currentTab === 'messages' &&
           $scope.selected &&
-          _.findWhere($scope.selected.messages, { id: change.id }) ||
-          shouldUpdateOnChange(change);
+          _.findWhere($scope.selected.messages, { id: change.id });
       }
     });
 

@@ -35,15 +35,13 @@ var _ = require('underscore'),
     var ctrl = this;
     var mapStateToTarget = function(state) {
       return {
-        enketoStatus: state.enketoStatus,
-        updateOnChange: state.updateOnChange
+        enketoStatus: state.enketoStatus
       };
     };
     var mapDispatchToTarget = function(dispatch) {
       var actions = Actions(dispatch);
       return {
-        clearCancelCallback: actions.clearCancelCallback,
-        setUpdateOnChange: actions.setUpdateOnChange
+        clearCancelCallback: actions.clearCancelCallback
       };
     };
     var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
@@ -76,7 +74,6 @@ var _ = require('underscore'),
     };
 
     var _query = function(options) {
-      ctrl.setUpdateOnChange(false);
       options = options || {};
       options.limit = options.limit || 50;
 
@@ -461,8 +458,6 @@ var _ = require('underscore'),
       );
     };
 
-    const shouldUpdateOnChange = change => ctrl.updateOnChange === true || ctrl.updateOnChange === change.id;
-
     var changeListener = Changes({
       key: 'contacts-list',
       callback: function(change) {
@@ -495,8 +490,7 @@ var _ = require('underscore'),
         return (
           (change.doc && ContactSchema.getTypes().indexOf(change.doc.type) !== -1) ||
           (change.deleted && liveList.contains(change.id)) ||
-          isRelevantVisitReport(change.doc) ||
-          shouldUpdateOnChange(change)
+          isRelevantVisitReport(change.doc)
         );
       },
     });

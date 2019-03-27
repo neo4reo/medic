@@ -39,7 +39,6 @@ angular.module('inboxControllers').controller('ReportsAddCtrl',
         setEnketoEditedStatus: actions.setEnketoEditedStatus,
         setEnketoSavingStatus: actions.setEnketoSavingStatus,
         setEnketoError: actions.setEnketoError,
-        setUpdateOnChange: actions.setUpdateOnChange
       };
     };
     var unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
@@ -162,7 +161,7 @@ angular.module('inboxControllers').controller('ReportsAddCtrl',
       var reportId = model.doc && model.doc._id;
       var formInternalId = model.formInternalId;
 
-      Enketo.save(formInternalId, $scope.form, geolocation, reportId, ctrl.setUpdateOnChange)
+      Enketo.save(formInternalId, $scope.form, geolocation, reportId)
         .then(function(docs) {
           $log.debug('saved report and associated docs', docs);
           ctrl.setEnketoSavingStatus(false);

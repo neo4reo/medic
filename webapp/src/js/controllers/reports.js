@@ -31,8 +31,7 @@ angular
     var mapStateToTarget = function(state) {
       return {
         selectMode: state.selectMode,
-        enketoStatus: state.enketoStatus,
-        updateOnChange: state.updateOnChange
+        enketoStatus: state.enketoStatus
       };
     };
 
@@ -217,7 +216,6 @@ angular
     };
 
     var query = function(opts) {
-      ctrl.setUpdateOnChange(false);
       const options = _.extend({ limit: 50, hydrateContactNames: true }, opts);
       if (!options.silent) {
         $scope.error = false;
@@ -343,7 +341,7 @@ angular
         }
 
         doc.verified = doc.verified === valid ? undefined : valid;
-        ctrl.setUpdateOnChange(doc._id);
+        ctrl.setUpdateOnChange(doc);
 
         DB()
           .post(doc)
@@ -496,8 +494,6 @@ angular
 
     $scope.$on('DeselectAll', deselectAll);
 
-    const shouldUpdateOnChange = change => ctrl.updateOnChange === true || ctrl.updateOnChange === change.id;
-
     var changeListener = Changes({
       key: 'reports-list',
       callback: function(change) {
@@ -510,7 +506,7 @@ angular
         }
       },
       filter: function(change) {
-        return change.doc && change.doc.form || change.deleted || shouldUpdateOnChange(change);
+        return change.doc && change.doc.form || change.deleted && liveList.contains(change.id);
       },
     });
 

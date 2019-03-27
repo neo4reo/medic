@@ -4,12 +4,10 @@ angular
   .module('inboxControllers')
   .controller('MessagesCtrl', function(
     $log,
-    $ngRedux,
     $scope,
     $state,
     $stateParams,
     $timeout,
-    Actions,
     Changes,
     Export,
     MessageContacts,
@@ -18,18 +16,6 @@ angular
   ) {
     'use strict';
     'ngInject';
-
-    const ctrl = this;
-    const mapStateToTarget = (state) => ({ updateOnChange: state.updateOnChange });
-    const mapDispatchToTarget = (dispatch) => {
-      const actions = Actions(dispatch);
-      return {
-        setUpdateOnChange: actions.setUpdateOnChange
-      };
-    };
-
-    const unsubscribe = $ngRedux.connect(mapStateToTarget, mapDispatchToTarget)(ctrl);
-
 
     $scope.allLoaded = false;
     $scope.messages = [];
@@ -55,7 +41,6 @@ angular
     };
 
     var updateConversations = function(options) {
-      ctrl.setUpdateOnChange(false);
       options = options || {};
       if (!options.changes) {
         $scope.loading = true;
@@ -109,8 +94,6 @@ angular
       $scope.selected = null;
     });
 
-    const shouldUpdateOnChange = change => ctrl.updateOnChange === true || ctrl.updateOnChange === change.id;
-
     var changeListener = Changes({
       key: 'messages-list',
       callback: function() {
@@ -123,8 +106,7 @@ angular
         return (
           (change.doc && change.doc.kujua_message) ||
           (change.doc && change.doc.sms_message) ||
-          change.deleted ||
-          shouldUpdateOnChange(change)
+          change.deleted
         );
       },
     });
@@ -140,10 +122,7 @@ angular
 
     setActionBarData();
 
-    $scope.$on('$destroy', () => {
-      unsubscribe();
-      changeListener.unsubscribe();
-    });
+    $scope.$on('$destroy', changeListener.unsubscribe);
 
     if ($stateParams.tour) {
       Tour.start($stateParams.tour);
