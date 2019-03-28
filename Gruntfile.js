@@ -252,6 +252,7 @@ module.exports = function(grunt) {
       config: {
         rootUrl: 'APP_PREFIX',
         staticDirectoryPath: 'build/ddocs/medic/_attachments',
+        apiSrcDirectoryPath: 'api/src',
         scriptOutputPath: 'build/ddocs/medic/_attachments/js/service-worker.js',
       }
     },
