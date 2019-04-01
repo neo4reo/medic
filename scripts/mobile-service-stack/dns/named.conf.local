@@ -1,0 +1,5 @@
+zone "medic.dev" {
+  type master;
+  file "/etc/bind/db.medic.dev";
+};
+
