@@ -14,7 +14,7 @@ describe('Add new person tests : ', () => {
     return utils.afterEach();
   });
 
-  xit('should add new person', () => {
+  it('should add new person', () => {
     commonElements.goToPeople();
     expect(commonElements.isAt('contacts-list'));
     contactPage.addNewDistrict('BedeDistrict');
