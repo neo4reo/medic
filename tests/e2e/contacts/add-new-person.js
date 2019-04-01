@@ -9,9 +9,12 @@ describe('Add new person tests : ', () => {
     done();
   });
 
-  afterAll(utils.afterEach);
+  afterAll(() => {
+    expect(true).toBe(false);
+    return utils.afterEach();
+  });
 
-  it('should add new person', () => {
+  xit('should add new person', () => {
     commonElements.goToPeople();
     expect(commonElements.isAt('contacts-list'));
     contactPage.addNewDistrict('BedeDistrict');
