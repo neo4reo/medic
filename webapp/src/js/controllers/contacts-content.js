@@ -70,7 +70,12 @@ angular.module('inboxControllers').controller('ContactsContentCtrl',
       return Auth('can_view_tasks')
         .then(function() {
           $scope.selected.tasks = [];
-          var children = $scope.selected.children.persons || [];
+          const children = [];
+          $scope.selected.children.forEach(childModel => {
+            if (childModel.type.person) {
+              children.push(...childModel.contacts);
+            }
+          });
           TasksForContact(
             $scope.selected.doc._id,
             $scope.selected.doc.type,
@@ -108,6 +113,7 @@ angular.module('inboxControllers').controller('ContactsContentCtrl',
 
       return ContactViewModelGenerator(id, { getChildPlaces: !usersHomePlaceId || usersHomePlaceId !== id })
         .then(function(model) {
+          console.log('model', model);
           var refreshing = ($scope.selected && $scope.selected.doc._id) === id;
           $scope.setSelected(model);
           $scope.settingSelected(refreshing);
