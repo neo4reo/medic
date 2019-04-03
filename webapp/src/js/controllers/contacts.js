@@ -15,7 +15,6 @@ var _ = require('underscore'),
     Actions,
     Auth,
     Changes,
-    ContactSchema,
     ContactSummary,
     ContactTypes,
     Export,
@@ -185,18 +184,28 @@ var _ = require('underscore'),
         });
     };
 
-    var getActionBarDataForChild = function(docType) {
-      // TODO this should return an array of types...
-      var selectedChildPlaceType = ContactSchema.getChildPlaceType(docType);
-      if (!selectedChildPlaceType) {
-        return $q.resolve();
-      }
-      var schema = ContactSchema.get(selectedChildPlaceType);
-      return {
-        addPlaceLabel: schema.addButtonLabel,
-        type: selectedChildPlaceType,
-        icon: schema ? schema.icon : '',
-      };
+    const getChildTypes = function(typeId) {
+      return ContactTypes.getChildren(typeId).then(childTypes => {
+        const grouped = _.groupBy(childTypes, type => type.person ? 'persons' : 'places');
+        const models = [];
+        if (grouped.places) {
+          models.push({
+            menu_key: 'Add place',
+            menu_icon: 'fa-building',
+            permission: 'can_create_places',
+            types: grouped.places
+          });
+        }
+        if (grouped.persons) {
+          models.push({
+            menu_key: 'Add person',
+            menu_icon: 'fa-user',
+            permission: 'can_create_people',
+            types: grouped.persons
+          });
+        }
+        return models;
+      });
     };
 
     // only admins can edit their own place
@@ -236,15 +245,15 @@ var _ = require('underscore'),
       return $q
         .all([
           getTitle(selected),
-          getActionBarDataForChild(selectedDoc.type),
           getCanEdit(selectedDoc),
+          getChildTypes(selected.type.id)
         ])
         .then(function(results) {
-          $scope.setTitle(results[0]);
-          if (results[1]) {
-            selectedDoc.child = results[1];
-          }
-          var canEdit = results[2];
+          const title = results[0];
+          const canEdit = results[1];
+          const childTypes = results[2];
+
+          $scope.setTitle(title);
 
           $scope.setRightActionBar({
             relevantForms: [], // this disables the "New Action" button in action bar until full load is complete
@@ -252,16 +261,20 @@ var _ = require('underscore'),
             sendTo: selected.type && selected.type.person ? selectedDoc : '',
             canDelete: false, // this disables the "Delete" button in action bar until full load is complete
             canEdit: canEdit,
+            childTypes: childTypes
           });
 
-          return selected.reportLoader.then(function() {
-            return $q.all([
-              ContactSummary(selected.doc, selected.reports, selected.lineage),
-              Settings()
-            ])
+          return selected.reportLoader
+            .then(function() {
+              return $q.all([
+                ContactSummary(selected.doc, selected.reports, selected.lineage),
+                Settings()
+              ]);
+            })
             .then(function(results) {
+              const summary = results[0];
+              const settings = results[1];
               $scope.loadingSummary = false;
-              var summary = results[0];
               $scope.selected.summary = summary;
               var options = { doc: selectedDoc, contactSummary: summary.context };
               XmlForms('ContactsCtrl', options, function(err, forms) {
@@ -271,7 +284,7 @@ var _ = require('underscore'),
                 var showUnmuteModal = function(formId) {
                   return $scope.selected.doc &&
                          $scope.selected.doc.muted &&
-                         !isUnmuteForm(results[1], formId);
+                         !isUnmuteForm(settings, formId);
                 };
                 var formSummaries =
                   forms &&
@@ -295,10 +308,11 @@ var _ = require('underscore'),
                   sendTo: selected.type && selected.type.person ? selectedDoc : '',
                   canEdit: canEdit,
                   canDelete: canDelete,
+                  childTypes: childTypes
                 });
+                console.log('set relevantForms to ', formSummaries);
               });
             });
-          });
         })
         .catch(function(e) {
           $log.error('Error setting selected contact');
@@ -505,7 +519,7 @@ var _ = require('underscore'),
       },
       filter: function(change) {
         return (
-          ContactSchema.getTypes().indexOf(change.doc.type) !== -1 ||
+          ContactTypes.includes(change.doc) ||
           liveList.containsDeleteStub(change.doc) ||
           isRelevantVisitReport(change.doc)
         );
