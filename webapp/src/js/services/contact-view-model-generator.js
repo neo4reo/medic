@@ -21,11 +21,11 @@ angular.module('inboxServices').factory('ContactViewModelGenerator',
     $q,
     $translate,
     ContactMuted,
+    ContactTypes,
     DB,
     GetDataRecords,
     LineageModelGenerator,
-    Search,
-    Settings
+    Search
   ) {
     'ngInject';
     'use strict';
@@ -153,6 +153,18 @@ angular.module('inboxServices').factory('ContactViewModelGenerator',
       return childModels;
     };
 
+    const getPersonChildTypes = (types, parentId) => {
+      if (!parentId) {
+        return [];
+      }
+      const childTypes = types.filter(type => {
+        return type.person &&
+               type.parents &&
+               type.parents.includes(parentId);
+      });
+      return childTypes;
+    };
+
     const getChildren = (model, types, { getChildPlaces } = {}) => {
       const options = { include_docs: true };
       const contactId = model.doc._id;
@@ -161,10 +173,12 @@ angular.module('inboxServices').factory('ContactViewModelGenerator',
         options.startkey = [ contactId ];
         options.endkey = [ contactId, {} ];
       } else {
-        // just get people
-        options.keys = types
-          .filter(type => type.person && type.parents && type.parents.includes(model.type))
-          .map(type => [ contactId, type.id ]);
+        // just get person children
+        const childTypes = getPersonChildTypes(types, model.type && model.type.id);
+        if (!childTypes.length) {
+          return $q.resolve([]);
+        }
+        options.keys = childTypes.map(type => [ contactId, type.id ]);
       }
       return DB().query('medic-client/contacts_by_parent', options)
         .then(response => response.rows);
@@ -272,11 +286,11 @@ angular.module('inboxServices').factory('ContactViewModelGenerator',
 
     return function(id, options) {
       return $q.all([
-        Settings(),
+        ContactTypes.getAll(),
         LineageModelGenerator.contact(id, options)
       ])
         .then(results => {
-          const types = results[0].contact_types || [];
+          const types = results[0];
           const model = results[1];
 
           setType(model, types);

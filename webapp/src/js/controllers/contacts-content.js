@@ -4,10 +4,10 @@ var _ = require('underscore'),
 angular.module('inboxControllers').controller('ContactsContentCtrl',
   function(
     $log,
+    $q,
     $scope,
     $state,
     $stateParams,
-    $timeout,
     $translate,
     Auth,
     Changes,
@@ -66,44 +66,52 @@ angular.module('inboxControllers').controller('ContactsContentCtrl',
       return TranslateFrom(value, task);
     };
 
-    var getTasks = function() {
+    const canViewTasks = () => {
       return Auth('can_view_tasks')
-        .then(function() {
-          $scope.selected.tasks = [];
-          const children = [];
-          $scope.selected.children.forEach(childModel => {
-            if (childModel.type.person) {
-              children.push(...childModel.contacts);
-            }
-          });
-          TasksForContact(
-            $scope.selected.doc._id,
-            $scope.selected.doc.type,
-            _.pluck(children, 'id'),
-            'ContactsContentCtrl',
-            function(areTasksEnabled, tasks) {
-              if ($scope.selected) {
-                $timeout(() => {
-                  tasks.forEach(function(task) {
-                    task.title = translate(task.title, task);
-                    task.priorityLabel = translate(task.priorityLabel, task);
-                  });
-                  $scope.selected.areTasksEnabled = areTasksEnabled;
-                  $scope.selected.tasks = tasks;
-                  children.forEach(function(child) {
-                    child.taskCount = tasks.filter(function(task) {
-                      return task.doc &&
-                             task.doc.contact &&
-                             task.doc.contact._id === child.doc._id;
-                    }).length;
-                  });
-                });
-              }
-            });
-        })
-        .catch(function() {
+        .then(() => true)
+        .catch(() => false);
+    };
+
+    var getTasks = function() {
+      return canViewTasks().then(allowed => {
+        if (!allowed) {
           $log.debug('Not authorized to view tasks');
+          return;
+        }
+        $scope.selected.tasks = [];
+        const children = [];
+        $scope.selected.children.forEach(childModel => {
+          if (childModel.type.person) {
+            children.push(...childModel.contacts);
+          }
         });
+        const deferred = $q.defer();
+        TasksForContact(
+          $scope.selected.doc._id,
+          $scope.selected.doc.type,
+          _.pluck(children, 'id'),
+          'ContactsContentCtrl',
+          function(areTasksEnabled, tasks) {
+            if ($scope.selected) {
+              tasks.forEach(function(task) {
+                task.title = translate(task.title, task);
+                task.priorityLabel = translate(task.priorityLabel, task);
+              });
+              $scope.selected.areTasksEnabled = areTasksEnabled;
+              $scope.selected.tasks = tasks;
+              children.forEach(function(child) {
+                child.taskCount = tasks.filter(function(task) {
+                  return task.doc &&
+                         task.doc.contact &&
+                         task.doc.contact._id === child.doc._id;
+                }).length;
+              });
+            }
+            deferred.resolve();
+          }
+        );
+        return deferred.promise;
+      });
     };
 
     var selectContact = function(id, silent) {
@@ -113,7 +121,6 @@ angular.module('inboxControllers').controller('ContactsContentCtrl',
 
       return ContactViewModelGenerator(id, { getChildPlaces: !usersHomePlaceId || usersHomePlaceId !== id })
         .then(function(model) {
-          console.log('model', model);
           var refreshing = ($scope.selected && $scope.selected.doc._id) === id;
           $scope.setSelected(model);
           $scope.settingSelected(refreshing);

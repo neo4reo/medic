@@ -12,8 +12,7 @@ describe('ContactsContentCtrl', () => {
       changesCallback,
       changesFilter,
       contactChangeFilter = sinon.stub(),
-      debounce,
-      timeout;
+      debounce;
 
   const childPerson = {
     _id: 'peach',
@@ -26,21 +25,24 @@ describe('ContactsContentCtrl', () => {
     _id: 'districtsdistrict',
     type: 'clinic',
     contact: { _id: 'mario' },
-    children: { persons: [ ] }
+    children: [ {
+      type: { id: 'person', person: true},
+      contacts: []
+    }]
   };
 
   const stubContactViewModelGenerator = (doc, childArray) => {
-    const childRows = childArray.map(child => {
-      return { id: child._id, doc: child };
-    });
+    const childRows = childArray.map(child => ({ id: child._id, doc: child }));
     const model = {
       doc: doc,
-      children: { persons: childRows }
+      children: [{
+        type: { id: 'person', person: true },
+        contacts: childRows
+      }]
     };
 
     contactViewModelGenerator.returns(Promise.resolve());
-    contactViewModelGenerator.withArgs(doc._id)
-      .returns(Promise.resolve(model));
+    contactViewModelGenerator.withArgs(doc._id).returns(Promise.resolve(model));
   };
 
   const stubTasksForContact = tasks => {
@@ -67,7 +69,7 @@ describe('ContactsContentCtrl', () => {
 
   beforeEach(module('inboxApp'));
 
-  beforeEach(inject((_$rootScope_, $controller, _$timeout_) => {
+  beforeEach(inject((_$rootScope_, $controller) => {
     scope = _$rootScope_.$new();
     scope.setLoadingContent = sinon.stub();
     scope.setSelected = selected => scope.selected = selected;
@@ -80,7 +82,6 @@ describe('ContactsContentCtrl', () => {
       go: sinon.stub()
     };
 
-    timeout = _$timeout_;
     controller = $controller;
 
     contactViewModelGenerator = sinon.stub();
@@ -103,7 +104,6 @@ describe('ContactsContentCtrl', () => {
       stateParams = { id: doc._id };
       stubContactViewModelGenerator(doc, childrenArray);
       return createController().setupPromise.then(() => {
-        timeout.flush();
         assert(scope.selected, 'selected should be set on the scope');
         return scope.selected;
       });
@@ -163,8 +163,9 @@ describe('ContactsContentCtrl', () => {
     });
 
     const runChangeFeedProcessTest = () => {
-      stateParams = { id: doc._id};
+      stateParams = { id: doc._id };
       stubContactViewModelGenerator(doc,  []);
+      stubTasksForContact([]);
       return createController().setupPromise.then(() => {
         assert(scope.selected, 'selected should be set on the scope');
         return scope.selected;

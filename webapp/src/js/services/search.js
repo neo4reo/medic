@@ -137,7 +137,6 @@ var _ = require('underscore'),
 
         return _search(type, filters, options, extensions)
           .then(function(searchResults) {
-            console.log('searchResults', searchResults);
             if (docIds && docIds.length) {
               docIds.forEach(function(docId) {
                 if (searchResults.docIds.indexOf(docId) === -1) {
@@ -176,8 +175,6 @@ var _ = require('underscore'),
             });
           })
           .then(function(results) {
-            console.log('data records', results);
-
             _currentQuery = {};
             return results;
           })
