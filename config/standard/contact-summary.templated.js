@@ -162,7 +162,7 @@ var cards = [
           subsequentDeliveries = extras.getSubsequentDeliveries(report);
           if (subsequentDeliveries.length === 0) { return; }
 
-          relevantDelivery = extras.extras.getOldestReport(subsequentDeliveries);
+          relevantDelivery = extras.getOldestReport(subsequentDeliveries);
           birthdate = getBirthDate(relevantDelivery);
 
           // Ignore pregnancy reports that are superseded before delivery report
