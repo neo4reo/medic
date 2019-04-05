@@ -142,12 +142,13 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', true);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: true,
-        }]);
+        });
+        chai.expect(parseInt(post.args[0][0].verified_date)).to.be.closeTo(Date.now(), 1000);
       });
     });
 
@@ -162,12 +163,12 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', false);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: false
-        }]);
+        });
       });
     });
 
@@ -182,12 +183,12 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', false);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: false
-        }]);
+        });
       });
     });
 
@@ -202,12 +203,12 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', false);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: undefined
-        }]);
+        });
       });
     });
 
@@ -222,12 +223,12 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', true);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: true
-        }]);
+        });
       });
     });
 
@@ -242,12 +243,12 @@ describe('ReportsCtrl controller', () => {
       scope.$broadcast('VerifyReport', true);
       return Promise.resolve().then(() => {
         chai.expect(post.callCount).to.equal(1);
-        chai.expect(post.args[0]).to.deep.equal([{
+        chai.expect(post.args[0][0]).to.deep.include({
           _id: 'def',
           name: 'hello',
           form: 'P',
           verified: undefined
-        }]);
+        });
       });
     });
   });
