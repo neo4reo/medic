@@ -12,7 +12,7 @@ angular.module('controllers').controller('MainCtrl',
     'ngInject';
     $translate.use('en');
     $scope.authorized = false;
-    Auth('can_configure')
+    Auth.any('can_view_outgoing_messages', 'can_configure')
     .then(function() {
       $scope.authorized = true;
     })
