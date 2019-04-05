@@ -336,6 +336,9 @@ angular
         }
 
         doc.verified = doc.verified === valid ? undefined : valid;
+        if (!doc.verified_date) {
+          doc.verified_date = Date.now();
+        }
 
         DB()
           .post(doc)
